@@ -98,3 +98,61 @@ function addDepartment() {
             })
     })
 };
+
+function addEmployees() {
+    db.query("select * from roles;", function (err, data) {
+        if (err) throw err;
+        let roleList = data.map(element => ({
+            name: element.title,
+            value: element.id
+        })
+        )
+        db.query("select * from employee where manager_id is null;", function (err, data) {
+            if (err) throw err;
+            let managerlist = data.map(element => ({
+                name: element.firstName + ', ' + element.lastName,
+                value: element.id
+            })
+            )
+            managerlist.push({ name: "I am a Manager", value: null })
+            inquirer.prompt([
+                {
+                    name: 'firstname',
+                    type: 'input',
+                    message: 'enter first name?'
+                },
+                {
+                    name: 'lastname',
+                    type: 'input',
+                    message: 'enter last name?'
+                },
+                {
+                    name: 'role_id',
+                    type: 'list',
+                    message: 'enter role id?',
+                    choices: roleList
+                },
+                {
+                    name: 'manager_id',
+                    type: 'list',
+                    message: 'enter manager id?',
+                    choices: managerlist
+                }
+            ]).then(function (answer) {
+                db.query(
+                    'INSERT INTO employee SET ?',
+                    {
+                        firstName: answer.firstname,
+                        lastName: answer.lastname,
+                        role_id: answer.role_id,
+                        manager_id: answer.manager_id,
+                    }
+                    , function (err, res) {
+                        if (err) throw err;
+                        console.log('new role has been added');
+                        startMenu();
+                    })
+            })
+        })
+    })
+    };
