@@ -1,7 +1,7 @@
 {
   "name": "12-employee-tracker",
   "version": "1.0.0",
-  "description": "mysql app",
+  "description": "mysql2 app",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -21,8 +21,8 @@
   "homepage": "https://github.com/eelnimeiry/12-Employee-Tracker#readme",
   "dependencies": {
     "console.table": "^0.10.0",
-    "dotenv":"^16.0.3",
+    "dotenv": "^16.0.3",
     "inquirer": "^8.2.4",
-    "mysql2": "^3.2.0"
+    "mysql2": "^3.2.3"
   }
 }
