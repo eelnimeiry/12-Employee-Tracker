@@ -156,3 +156,45 @@ function addEmployees() {
         })
     })
     };
+
+    function addRoles() {
+        db.query("select d.id ,d.name  from department d ;", function (err, data) {
+            if (err) throw err;
+            let departmentList = data.map(element => ({
+                name: element.name,
+                value: element.id
+            })
+            )
+            inquirer.prompt([
+                {
+                    name: 'title',
+                    type: 'input',
+                    message: 'enter role title?'
+                },
+                {
+                    name: 'salary',
+                    type: 'input',
+                    message: 'enter salary?'
+                },
+                {
+                    name: 'department_id',
+                    type: 'list',
+                    message: 'enter department_id?',
+                    choices: departmentList
+                }
+            ]).then(function (answer) {
+                db.query(
+                    'INSERT INTO roles SET ?',
+                    {
+                        title: answer.title,
+                        salary: answer.salary,
+                        department_id: answer.department_id,
+                    }
+                    , function (err, res) {
+                        if (err) throw err;
+                        console.log('new role has been added');
+                        startMenu();
+                    })
+            })
+        })
+    };
