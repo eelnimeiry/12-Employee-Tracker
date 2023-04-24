@@ -77,3 +77,24 @@ function viewEmployees(){
         starMenu()
 })
 }
+
+function addDepartment() {
+    inquirer.prompt([
+        {
+            name: 'newDepartment',
+            type: 'input',
+            message: 'Which department would you like to add?'
+        }
+    ]).then(function (answer) {
+        db.query(
+            'INSERT INTO department SET ?',
+            {
+                name: answer.newDepartment
+            }
+            , function (err, res) {
+                if (err) throw err;
+                console.log('Your department has been added!');
+                startMenu();
+            })
+    })
+};
