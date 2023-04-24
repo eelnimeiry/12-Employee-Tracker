@@ -4,7 +4,7 @@ require("dotenv").config()
 require("console.table")
 
 const db = mysql.createConnection({
-    host:'localhost',
+    host: 'localhost',
     port: 3306,
     user: 'root',
     password: process.env.MYSQL_PASSWORD,
@@ -25,7 +25,7 @@ function starMenu() {
             choices: ["View Employees", "view Department", "View Roles", "Add Department", "Add roles", "Add employees", "update Roles", "quit"],
             name: "selection"
         }
-    ]).then(({selection}) => {
+    ]).then(({ selection }) => {
         switch (selection) {
             case "View Employees":
                 viewEmployees();
@@ -54,28 +54,28 @@ function starMenu() {
     })
 }
 
-function viewRoles(){
-    db.query("select r.id,r.title,r.salary,e.id,e.firtName,e.lastname from roles r left join employee e on e.role_id = r.ride;",function(err,data){
-        if(err) throw err;
+function viewRoles() {
+    db.query("select r.id,r.title,r.salary,e.id,e.firtName,e.lastname from roles r left join employee e on e.role_id = r.ride;", function (err, data) {
+        if (err) throw err;
         console.table(data)
         starMenu()
-})
+    })
 }
 
-function viewDepartment(){
+function viewDepartment() {
     db.query("select d.id,d.name, r.title,r.salary from department d right join roles r on d.id = r.department_id order by d.name;",
-        function(err,data){
-        console.table(data)
-        starMenu()
-})
+        function (err, data) {
+            console.table(data)
+            starMenu()
+        })
 }
 
-function viewEmployees(){
-    db.query("select e.id,e.firstName,e.lastName, r.id,r.title,r.salary,d.id,d.name from employee e left join roles r on e.role_id = r.id left join department d on r.department_id = d.id;",function(err,data){
-        if(err) throw err;
+function viewEmployees() {
+    db.query("select e.id,e.firstName,e.lastName, r.id,r.title,r.salary,d.id,d.name from employee e left join roles r on e.role_id = r.id left join department d on r.department_id = d.id;", function (err, data) {
+        if (err) throw err;
         console.table(data)
         starMenu()
-})
+    })
 }
 
 function addDepartment() {
@@ -155,46 +155,91 @@ function addEmployees() {
             })
         })
     })
-    };
+};
 
-    function addRoles() {
-        db.query("select d.id ,d.name  from department d ;", function (err, data) {
+function addRoles() {
+    db.query("select d.id ,d.name  from department d ;", function (err, data) {
+        if (err) throw err;
+        let departmentList = data.map(element => ({
+            name: element.name,
+            value: element.id
+        })
+        )
+        inquirer.prompt([
+            {
+                name: 'title',
+                type: 'input',
+                message: 'enter role title?'
+            },
+            {
+                name: 'salary',
+                type: 'input',
+                message: 'enter salary?'
+            },
+            {
+                name: 'department_id',
+                type: 'list',
+                message: 'enter department_id?',
+                choices: departmentList
+            }
+        ]).then(function (answer) {
+            db.query(
+                'INSERT INTO roles SET ?',
+                {
+                    title: answer.title,
+                    salary: answer.salary,
+                    department_id: answer.department_id,
+                }
+                , function (err, res) {
+                    if (err) throw err;
+                    console.log('new role has been added');
+                    startMenu();
+                })
+        })
+    })
+};
+
+function updateRoles() {
+    db.query("select * from employee;", function (err, data) {
+        if (err) throw err;
+        let employeeList = data.map(element => ({
+            name: element.firstName + " ," + element.lastName,
+            value: element.id
+        })
+        )
+        db.query("select * from roles;", function (err, data) {
             if (err) throw err;
-            let departmentList = data.map(element => ({
-                name: element.name,
+            let roleList = data.map(element => ({
+                name: element.title,
                 value: element.id
             })
             )
             inquirer.prompt([
                 {
-                    name: 'title',
-                    type: 'input',
-                    message: 'enter role title?'
-                },
-                {
-                    name: 'salary',
-                    type: 'input',
-                    message: 'enter salary?'
-                },
-                {
-                    name: 'department_id',
+                    name: 'employee',
                     type: 'list',
-                    message: 'enter department_id?',
-                    choices: departmentList
+                    message: 'select employee who is role needs to be updated?',
+                    choices: employeeList
+                },
+                {
+                    name: 'role_id',
+                    type: 'list',
+                    message: 'select new role?',
+                    choices: roleList
                 }
             ]).then(function (answer) {
                 db.query(
-                    'INSERT INTO roles SET ?',
-                    {
-                        title: answer.title,
-                        salary: answer.salary,
-                        department_id: answer.department_id,
-                    }
+                    'UPDATE employee SET role_id = ? WHERE id = ?',
+                    [
+                        answer.role_id,
+                        answer.employee,
+                    ]
                     , function (err, res) {
                         if (err) throw err;
-                        console.log('new role has been added');
+                        console.log('employee role update');
                         startMenu();
                     })
             })
         })
-    };
+    })
+};
